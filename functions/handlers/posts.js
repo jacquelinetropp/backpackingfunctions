@@ -15,6 +15,8 @@ exports.getAllPosts = (req, res) => {
           commentCount: doc.data().commentCount,
           likeCount: doc.data().likeCount,
           userImage: doc.data().userImage,
+          location: doc.data().location,
+          title: doc.data().title,
         });
       });
       return res.json(posts);
@@ -25,13 +27,74 @@ exports.getAllPosts = (req, res) => {
     });
 };
 
+exports.getFollowingPosts = (req, res) => {
+  let users = [];
+  db.collection("followers")
+    .where("userHandle", "==", req.user.handle)
+    .get()
+    .then((data) => {
+      data.forEach((doc) => {
+        users.push(doc.data().following);
+      });
+
+      return db.collection("posts").get();
+    })
+    .then((data) => {
+      let posts = [];
+      data.forEach((doc) => {
+        users.forEach((user) => {
+          if (user == doc.data().userHandle) {
+            posts.push({
+              postId: doc.id,
+              body: doc.data().body,
+              userHandle: doc.data().userHandle,
+              createdAt: doc.data().createdAt,
+              commentCount: doc.data().commentCount,
+              likeCount: doc.data().likeCount,
+              userImage: doc.data().userImage,
+              location: doc.data().location,
+              title: doc.data().title,
+            });
+          }
+        });
+      });
+      return res.json(posts);
+    })
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json({ error: err.code });
+    });
+};
+
+// exports.getFollowingPosts = (req, res) => {
+//   const relationshipRef = db.collection('followers')
+//   let snapshot = await relationshipRef.where('userHandle', '==', req.user.handle).get()
+//   const posts = []
+//   snapshot.docs.forEach(doc => {
+//    const postsRef = db.collection('posts');
+//    let postSnap = await postsRef.where('userHandle', '==', doc.data().following.get()
+//    postSnap.forEach(p => {
+//       posts.push({
+//         p.id,
+//         ...p.data()
+//       })
+//    })
+// })
+// }
+
 exports.postOnePost = (req, res) => {
   if (req.body.body.trim() === "") {
     return res.status(400).json({ body: "Body must not be empty" });
   }
+  console.log(req.body.title);
+  if (req.body.title.trim() === "") {
+    return res.status(400).json({ title: "Title must not be empty" });
+  }
 
   const newPost = {
     body: req.body.body,
+    location: req.body.location,
+    title: req.body.title,
     userHandle: req.user.handle,
     userImage: req.user.imageUrl,
     createdAt: new Date().toISOString(),
@@ -87,7 +150,7 @@ exports.getPost = (req, res) => {
 //Post One comment
 exports.commentOnPost = (req, res) => {
   if (req.body.body.trim() === "")
-    return res.status(400).json({ error: "Must not be empty" });
+    return res.status(400).json({ comment: "Must not be empty" });
 
   const newComment = {
     body: req.body.body,
@@ -96,6 +159,7 @@ exports.commentOnPost = (req, res) => {
     userHandle: req.user.handle,
     userImage: req.user.imageUrl,
   };
+  console.log(newComment);
 
   db.doc(`/posts/${req.params.postId}`)
     .get()

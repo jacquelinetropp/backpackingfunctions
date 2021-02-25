@@ -1,7 +1,7 @@
 module.exports = {
   apiKey: "AIzaSyCZzgLGEX0KyYbXRPatTQBU9vivH6SecKs",
   authDomain: "backpackingbuddies-97109.firebaseapp.com",
-  databaseURL: "https://backpackingbuddies-97109.firebaseio.com",
+  databaseURL: "https://backpackingbuddies-97109.appspot.com",
   projectId: "backpackingbuddies-97109",
   storageBucket: "backpackingbuddies-97109.appspot.com",
   messagingSenderId: "45461669338",

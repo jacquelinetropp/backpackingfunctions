@@ -4,6 +4,9 @@ const app = require("express")();
 
 const FBAuth = require("./util/fbAuth");
 
+const cors = require("cors");
+app.use(cors());
+
 const { db } = require("./util/admin");
 
 const {
@@ -14,6 +17,7 @@ const {
   likePost,
   unlikePost,
   deletePost,
+  getFollowingPosts,
 } = require("./handlers/posts");
 
 const {
@@ -24,6 +28,8 @@ const {
   getAuthenticatedUser,
   getUserDetails,
   markNotificationsRead,
+  followUserCount,
+  unfollowUser,
 } = require("./handlers/users");
 
 //Post Routes
@@ -34,6 +40,7 @@ app.delete("/post/:postId", FBAuth, deletePost);
 app.get("/post/:postId/like", FBAuth, likePost);
 app.get("/post/:postId/unlike", FBAuth, unlikePost);
 app.post("/post/:postId/comment", FBAuth, commentOnPost);
+app.get("/posts/following", FBAuth, getFollowingPosts);
 
 //Users route
 app.post("/signup", signup);
@@ -43,6 +50,10 @@ app.post("/user", FBAuth, addUserDetails);
 app.get("/user", FBAuth, getAuthenticatedUser);
 app.get("/user/:handle", getUserDetails);
 app.post("/notifications", FBAuth, markNotificationsRead);
+
+//following routes
+app.get("/user/:handle/follow", FBAuth, followUserCount);
+app.get("/user/:handle/unfollow", FBAuth, unfollowUser);
 
 exports.api = functions.region("us-central1").https.onRequest(app);
 
